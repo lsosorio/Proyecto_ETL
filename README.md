@@ -267,8 +267,8 @@ CREATE TABLE IF NOT EXISTS ventas_totales (
 from data_loading import DataLoading
 
 loader = DataLoading()
-loader.cargar_tabla_largo(costos_totales, "costos_totales")  # Formato largo
-loader.cargar_tabla_largo(ventas_totales, "ventas_totales")  # Formato largo
+loader.cargar_tabla_largo(costos_totales, "costos_totales_largo")  # Formato largo
+loader.cargar_tabla_largo(ventas_totales, "ventas_largo")           # Formato largo
 ```
 
 ---
@@ -287,10 +287,10 @@ loader.cargar_tabla_largo(ventas_totales, "ventas_totales")  # Formato largo
 
 ### 4.2 Tablas Generadas
 
-| Tabla             | Descripción                                              | Uso Principal                           |
-|-------------------|----------------------------------------------------------|----------------------------------------|
-| `ventas_totales`  | Ventas totales por año, negocio, línea y mes            | Análisis de ingresos                   |
-| `costos_totales`  | Costos totales con desglose por niveles contables       | Análisis de estructura de costos       |
+| Tabla                 | Descripción                                              | Uso Principal                           |
+|-----------------------|----------------------------------------------------------|----------------------------------------|
+| `ventas_largo`        | Ventas totales por año, negocio, línea y mes            | Análisis de ingresos                   |
+| `costos_totales_largo`| Costos totales con desglose por niveles contables       | Análisis de estructura de costos       |
 
 ### 4.3 Validaciones Implementadas
 
@@ -509,7 +509,7 @@ pip install -r requirements.txt
 O manualmente:
 
 ```bash
-pip install polars cryptography python-dotenv
+pip install polars cryptography python-dotenv requests matplotlib seaborn
 ```
 
 ### 8.2 Configuración
@@ -545,7 +545,7 @@ python main.py
 **Estudiante(s) de Maestría en Ingeniería**  
 Miguel Caycedo, Diego Teuta, Jhon Deivi Riascos, Luis Santiago Osorio Ortiz
 Universidad Autónoma de Occidente  
-Asignatura: ETL — Semestre 1, 2025-2026
+Asignatura: ETL — Semestre 1, 2026
 
 ---
 
