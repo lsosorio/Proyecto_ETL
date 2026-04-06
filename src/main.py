@@ -36,5 +36,5 @@ print(ventas_totales)
 
 loader = DataLoading()
 
-loader.cargar_tabla_largo(costos_totales, "costos_totales")   # Formato largo (MES, TOTAL_MES)
-loader.cargar_tabla_largo(ventas_totales, "ventas_totales")   # Formato largo (MES, TOTAL_MES)
+loader.cargar_tabla_largo(costos_totales, "costos_totales_largo")   # Formato largo (MES, TOTAL_MES)
+loader.cargar_tabla_largo(ventas_totales, "ventas_largo")   # Formato largo (MES, TOTAL_MES)

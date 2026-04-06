@@ -323,11 +323,93 @@ El archivo `Power BI/Proyecto ETL.pbix` contiene los dashboards interactivos que
 
 *Dashboard principal con KPIs de ventas, costos y participación por negocio y línea.*
 
-#### Transformaciones de Datos en Power BI
+#### Transformaciones de Datos en Power BI (Modelo Relacional)
 
 ![Transformación Data Interna](Power%20BI/Imagenes/02%20-%20Transformacion%20Data%20Interna.png)
 
 *Vista de las transformaciones aplicadas dentro de Power Query para preparar los datos.*
+
+#### Conexión a Datos (Power Query)
+
+Las siguientes consultas en Power Query (M) se utilizan para conectar Power BI con la base de datos SQLite:
+
+**Tabla `costos_totales_largo`:**
+
+```powerquery
+let
+    Origen = Odbc.DataSource("database=C:\Users\migue\Desktop\MAESTRIA\ETL\proyecto etl\pyg.db;dsn=SQLite3 Datasource", [HierarchicalNavigation=true]),
+    costos_totales_largo_Table = Origen{[Name="costos_totales_largo",Kind="Table"]}[Data],
+    #"Columna combinada insertada" = Table.AddColumn(costos_totales_largo_Table, "Combinada", each Text.Combine({[mes], Text.From([ano], "es-CO")}, "/"), type text),
+    #"Personalizada agregada" = Table.AddColumn(#"Columna combinada insertada", "Personalizado", each 1),
+    #"Columnas combinadas" = Table.CombineColumns(Table.TransformColumnTypes(#"Personalizada agregada", {{"Personalizado", type text}}, "es-CO"),{"Personalizado", "Combinada"},Combiner.CombineTextByDelimiter("/", QuoteStyle.None),"Combinada.1"),
+    #"Tipo cambiado" = Table.TransformColumnTypes(#"Columnas combinadas",{{"Combinada.1", type date}}),
+    #"Columnas con nombre cambiado" = Table.RenameColumns(#"Tipo cambiado",{{"Combinada.1", "Periodo"}})
+in
+    #"Columnas con nombre cambiado"
+```
+
+**Tabla `ventas_largo`:**
+
+```powerquery
+let
+    Origen = Odbc.DataSource("database=C:\Users\migue\Desktop\MAESTRIA\ETL\proyecto etl\pyg.db;dsn=SQLite3 Datasource", [HierarchicalNavigation=true]),
+    ventas_largo_Table = Origen{[Name="ventas_largo",Kind="Table"]}[Data],
+    #"Personalizada agregada" = Table.AddColumn(ventas_largo_Table, "Personalizado", each 1),
+    #"Columna combinada insertada" = Table.AddColumn(#"Personalizada agregada", "Periodo", each Text.Combine({Text.From([Personalizado], "es-CO"), [mes], Text.From([ano], "es-CO")}, "/"), type text),
+    #"Tipo cambiado" = Table.TransformColumnTypes(#"Columna combinada insertada",{{"Periodo", type date}})
+in
+    #"Tipo cambiado"
+```
+
+#### Modelo Relacional y Consultas DAX
+
+Para relacionar las tablas de costos y ventas, se creó una **tabla calendario intermedia** que permite calcular métricas cruzadas:
+
+**Tabla Calendario (DAX):**
+
+```dax
+Tabla calendario = SUMMARIZE(
+    costos_totales_largo,
+    costos_totales_largo[Periodo],
+    costos_totales_largo[pais_territorio_negocio]
+)
+```
+
+**Llave Primaria - Tabla Calendario:**
+
+```dax
+Id = CONCATENATE('Tabla calendario'[pais_territorio_negocio], 'Tabla calendario'[Periodo])
+```
+
+**Llave Primaria - Tabla `ventas_largo`:**
+
+```dax
+idperiodo = CONCATENATE(ventas_largo[pais_territorio_negocio], ventas_largo[Periodo])
+```
+
+**Llave Primaria - Tabla `costos_totales_largo`:**
+
+```dax
+idperiodo = CONCATENATE(costos_totales_largo[pais_territorio_negocio], costos_totales_largo[Periodo])
+```
+
+**Medida Principal - Porcentaje de Costos sobre Ventas:**
+
+```dax
+Porcentaje% Costos sobre Ventas = DIVIDE(
+    CALCULATE(SUM(costos_totales_largo[total_mes])),
+    CALCULATE(SUM(ventas_largo[total_mes])),
+    0
+)
+```
+
+> Esta medida permite analizar la participación del costo total sobre las ventas totales, respondiendo directamente a la pregunta analítica central del proyecto.
+
+#### Acceso al Tablero en Línea
+
+El dashboard está disponible públicamente en Power BI Service:
+
+🔗 **[Ver Tablero Interactivo](https://app.powerbi.com/view?r=eyJrIjoiMjQ1ZTg3MmMtNmZjNi00YmM3LWI1ZjktMTlkYWVmNzhiNjJmIiwidCI6ImRmODY3OWNkLWE4MGUtNDVkOC05OWFjLWM4M2VkN2ZmOTVhMCJ9)**
 
 ---
 
